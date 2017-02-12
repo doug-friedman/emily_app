@@ -14,7 +14,7 @@ shinyUI(fluidPage(
 	  tabPanel("Power Regression", sidebarLayout(
 	  
 		sidebarPanel(
-		  helpText("This is an application designed to aid in performing regular statistical calculations for doctoral students at the Woods Hole Oceanographic Institute. You can upload a csv below and the application will automatically calculate several summary statistics and produce a plot of the data."),
+		  helpText("This is an application designed to aid in performing power regression calculations for doctoral students at the Woods Hole Oceanographic Institute. You can upload a csv below and the application will automatically calculate the necessary regression statistics and produce a plot of the data."),
 
 		  br(),
 		  helpText("If you are unsure what format your csv should take, you can download and edit a template csv using the link below."),
@@ -71,8 +71,9 @@ shinyUI(fluidPage(
 		),
 		
 		mainPanel(
-		  h3("Regression Plot"), plotOutput("reg_plot"),
-		  h3("Regression Diagnostics"), DT::dataTableOutput("reg_panel"),
+		  h3("Regression Plot"), plotlyOutput("reg_plot"),
+		  h3("Regression Panel"), DT::dataTableOutput("reg_panel"),
+		  h3("Regression Metrics"), DT::dataTableOutput("reg_gofs"),
 		  br(),
 		  helpText("The method used to calculate the power regression above is designed to match Excel's process for doing so. This is done by applying a log transformation to both X and Y and then performing a traditional Ordinary Least Squares Regression.", a("See this Stackoverflow for details.", href="https://stackoverflow.com/questions/18305852/power-regression-in-r-similar-to-excel"))
 		),

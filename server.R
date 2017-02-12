@@ -39,13 +39,22 @@ shinyServer(function(input, output, session) {
     }
   )
   
-  output$reg_plot = renderPlot({
+  output$reg_plot = renderPlotly({
     data = clean_data()
 	reg_res = run_regression()
-	
-	plot(data$X, data$Y, type="p", xlab="X", ylab="Y")
-    samp_x = seq(0.1, max(data$X), by=0.01)
-    lines(samp_x, exp(predict(reg_res, data.frame(X=samp_x))), col="red")	
+
+	# Create dataframe with power fit to plot nicely
+	samp_x = seq(0.1, max(data$X), by=0.01)
+	fit_df = data.frame(reg_line_x = samp_x,
+	                    reg_line_y = exp(predict(reg_res, data.frame(X=samp_x))))
+						
+	g1 = ggplot(data=data, aes(x=X, y=Y)) +
+	       geom_point() +
+	       geom_line(data=fit_df, aes(x=reg_line_x, y=reg_line_y), color="red") +
+		   ylim(c(0, max(data$Y)+5)) +
+		   theme_few()
+		   
+    ggplotly(g1)
   })
   
   output$reg_panel = DT::renderDataTable({
@@ -65,11 +74,26 @@ shinyServer(function(input, output, session) {
 	# Round everything to 5 digits
 	panel[,-1] = apply(panel[,-1], 2, signif, digits=5)
 	
-	datatable(panel, rownames=F, options=list(columnDefs = list(list(className = 'dt-center', targets = c(0:4)))))
+	datatable(panel, rownames=F, options=list(dom = 't', columnDefs = list(list(className = 'dt-center', targets = c(0:4)))))
 	
   })
   
-  
+  output$reg_gofs = DT::renderDataTable({
+    reg_res = run_regression()
+	
+	rsq = summary(reg_res)$r.squared
+	mse = mean(residuals(reg_res)^2)
+	
+	gof_df = data.frame(
+	  "Metric" = c("R-Squared", "Mean Squared Error", "Root Mean Squared Error"),
+	  "Value" = c(rsq, mse, sqrt(mse))
+	)
+	
+	# Round everything to 5 digits
+	gof_df[,2] = sapply(gof_df[,2], signif, digits=5)
+	
+	
+	datatable(gof_df, rownames=F, options=list(dom = 't', columnDefs = list(list(className = 'dt-center', targets = c(0:1)))))
+  })
 
-  
 })
